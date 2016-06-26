@@ -1,0 +1,27 @@
+{
+  "name": "hivemind-worker",
+  "version": "1.0.0",
+  "description": "Service worker for the Rhodes University Humans vs. Zombies system. Powered by Firebase and NodeJS.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RhodesHvZ/hivemind-worker.git"
+  },
+  "keywords": [
+    "Humans vs. Zombies",
+    "HvZ"
+  ],
+  "author": "Greg Linklater & Rhodes HvZ Team",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/RhodesHvZ/hivemind-worker/issues"
+  },
+  "homepage": "https://github.com/RhodesHvZ/hivemind-worker#readme",
+  "dependencies": {
+    "firebase": "^3.0.5"
+  }
+}
