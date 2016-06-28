@@ -4,6 +4,7 @@
  * Dependencies
  */
 const firebase = require('firebase')
+const EventDispatcher = require('./EventDispatcher')
 
 /**
  * Initialize Firebase App
@@ -14,13 +15,6 @@ firebase.initializeApp({
 })
 
 /**
- * Example DB Fetch
+ * Main
  */
-let ref = firebase.database().ref().child('games')
-
-ref.once('value', function (data) {
-  let val = data.val()
-  Object.keys(val).forEach(function (key) {
-    console.log('DATA', val[key])
-  })
-})
+let dispatcher = new EventDispatcher()
