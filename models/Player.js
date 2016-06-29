@@ -47,10 +47,6 @@ class Player extends Model {
       .child(uid)
   }
 
-  create (opts) {
-    return this.ref.set(opts)
-  }
-
   get game () {
     return new Promise((resolve, reject) => {
       this.loaded.then(() => {

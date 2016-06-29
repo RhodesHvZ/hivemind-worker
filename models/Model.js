@@ -30,6 +30,10 @@ class Model {
     this.$$val = snapshot.val()
   }
 
+  create (opts) {
+    this.ref.set(opts)
+  }
+
   get ref () {
     return this.$$ref
   }

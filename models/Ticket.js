@@ -48,10 +48,6 @@ class Ticket extends Model {
       .child(ticket)
   }
 
-  create (opts) {
-    return this.ref.set(opts)
-  }
-
   pushRef () {
     return firebase
       .database()
