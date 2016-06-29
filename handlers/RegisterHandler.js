@@ -86,10 +86,10 @@ class RegisterHandler extends BaseHandler {
     let _secret
 
     return new Promise((resolve, reject) => {
-      return Player.get(handler.game.name, handler.user.uid).loaded
+      return Player.get(game.val.name, user.val.uid).loaded
         .then((player) => {
           return new Promise((resolve, reject) => {
-            Secret.create(player.uid)
+            Secret.create(player.val.uid)
               .then((secret) => {
                 _player = player
                 _secret = secret
@@ -99,8 +99,8 @@ class RegisterHandler extends BaseHandler {
         })
         .then(() => {
           return _player.create({
-            game: game_name,
-            uid: subject,
+            game: game.val.name,
+            uid: user.val.uid,
             display_name: user.val.username,
             picture: user.val.picture,
             game_state: 'human',
