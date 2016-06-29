@@ -9,6 +9,7 @@ const BaseHandler = require(path.join(cwd, 'handlers', 'BaseHandler'))
 const User = require(path.join(cwd, 'models', 'User'))
 const Game = require(path.join(cwd, 'models', 'Game'))
 const Player = require(path.join(cwd, 'models', 'Player'))
+const Secret = require(path.join(cwd, 'models', 'Secret'))
 
 /**
  * Scope
