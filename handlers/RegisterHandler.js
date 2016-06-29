@@ -85,6 +85,18 @@ class RegisterHandler extends BaseHandler {
     return new Promise((resolve, reject) => {
       return Player.get(handler.game.name, handler.user.uid).loaded
         .then((player) => {
+          return new Promise((resolve, reject) => {
+            Secret.create(player.uid)
+              .then((secret) => {
+                resolve({
+                  secret,
+                  player
+                })
+              })
+          })
+        })
+        .then((opts) => {
+          let {secret, player} = opts
           return player.create({
             game: game_name,
             uid: subject,
