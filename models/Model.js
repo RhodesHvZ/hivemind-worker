@@ -20,18 +20,22 @@ class Model {
     this.$$ref = ref
     this.$$val = null
     this.$$loaded = new Promise((resolve, reject) => {
-      ref.on('value', this.update, reject)
+      ref.on('value', this.updateValue, reject)
       ref.once('value', (snapshot) => { resolve(this) }, reject)
     })
   }
 
-  update (snapshot) {
+  updateValue (snapshot) {
     this.$$snapshot = snapshot
     this.$$val = snapshot.val()
   }
 
   create (opts) {
-    this.ref.set(opts)
+    return this.ref.set(opts)
+  }
+
+  update (opts) {
+    return this.ref.update(opts)
   }
 
   get ref () {
