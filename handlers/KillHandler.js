@@ -6,7 +6,8 @@ const cwd = process.cwd()
 const path = require('path')
 const firebase = require('firebase')
 const BaseHandler = require(path.join(cwd, 'handlers', 'BaseHandler'))
-const User = require(path.join(cwd, 'models', 'User'))
+const Player = require(path.join(cwd, 'models', 'Player'))
+const Game = require(path.join(cwd, 'models', 'Game'))
 
 /**
  * Scope
@@ -23,6 +24,92 @@ class KillHandler extends BaseHandler {
 
     Promise
       .resolve({handler})
+      .then(handler.verify)
+  }
+
+  verify (opts) {
+    let {handler} = opts
+
+    if (!handler.event || !handler.event.game) {
+      return handler.error({
+        scope,
+        message: 'kill event must have game field'
+      })
+    }
+
+    if (!handler.event || !handler.event.subject) {
+      return handler.error({
+        scope,
+        message: 'kill event must have subject field'
+      })
+    }
+
+    if (!handler.event || !handler.event.secret) {
+      return handler.error({
+        scope,
+        message: 'kill event must have secret field'
+      })
+    }
+
+    return new Promise((resolve, reject) => {
+      let game = Game.get(handler.event.game)
+      let killer = Player.get(handler.event.game, handler.event.subject)
+      let secret = Secret.get(handler.event.secret)
+      let target
+
+      Promise.all([
+        game.loaded,
+        killer.loaded,
+        secret.loaded
+      ]).then(() => {
+        if (!killer || !killer.val) {
+          return handler.error({
+            scope,
+            message: `${handler.event.subject} (killer) is an invalid player`
+          })
+        }
+
+        if (killer.val.game_state !== 'zombie') {
+          return handler.error({
+            scope,
+            message: `${handler.event.subject} (killer) needs to be a zombie to tag a human`
+          })
+        }
+
+        if (!secret || !secret.val) {
+          return handler.error({
+            scope,
+            message: `${handler.event.secret} is an invalid secret`
+          })
+        }
+
+      ]).then(() => {
+        target = Player.get(handler.event.game, secret.val)
+        return target.loaded
+      ]).then(() => {
+        if (!target || !target.val) {
+          return handler.error({
+            scope,
+            message: `${secret.val} (target) is an invalid player`
+          })
+        }
+
+        if (target.val.game_state !== 'human') {
+          return handler.error({
+            scope,
+            message: `${secret.val} (target) needs to be human to be tagged`
+          })
+        }
+
+        resolve({
+          handler,
+          game,
+          subject: killer,
+          target
+        })
+
+      })
+    })
   }
 
 }
