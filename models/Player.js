@@ -47,12 +47,6 @@ class Player extends Model {
       .child(uid)
   }
 
-  * newSecret () {
-    crypto.randomBytes(3, (err, buf) => { 
-      yield buf.toString('hex').toUpperCase())
-    })
-  }
-
   create (opts) {
     return this.ref.set(opts)
   }
