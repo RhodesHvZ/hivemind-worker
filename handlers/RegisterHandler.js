@@ -96,8 +96,7 @@ class RegisterHandler extends BaseHandler {
                 resolve()
               })
           })
-        })
-        .then(() => {
+        }).then(() => {
           return _player.create({
             game: game.val.name,
             uid: user.val.uid,
