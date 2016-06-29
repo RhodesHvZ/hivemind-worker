@@ -47,24 +47,24 @@ class RegisterHandler extends BaseHandler {
 
     return new Promise ((resolve, reject) => {
       return Promise.all([
-        Game.get(handler.event.game),
-        User.get(handler.event.subject)
+        Game.get(handler.event.game).loaded,
+        User.get(handler.event.subject).loaded
       ]).then((game, user) => {
-        if (!game) {
+        if (!game || !game.val) {
           return handler.error({
             scope,
             message: `${handler.event.game} is an invalid game`
           })
         }
 
-        if (!user) {
+        if (!user || !user.val) {
           return handler.error({
             scope,
             message: `${handler.event.subject} is an invalid user`
           })
         }
 
-        if (game.status !== 'registration') {
+        if (game.val.status !== 'registration') {
           return handler.error({
             scope,
             message: `${game.name} is not open for registration`
@@ -101,10 +101,10 @@ class RegisterHandler extends BaseHandler {
           return player.create({
             game: game_name,
             uid: subject,
-            display_name: user.username,
-            picture: user.picture,
+            display_name: user.val.username,
+            picture: user.val.picture,
             game_state: 'human',
-            secret: player.newSecret()
+            secret: secret.val
           })
         }).then(() => {
           resolve({
