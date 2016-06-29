@@ -8,6 +8,7 @@ const firebase = require('firebase')
 const BaseHandler = require(path.join(cwd, 'handlers', 'BaseHandler'))
 const Player = require(path.join(cwd, 'models', 'Player'))
 const Game = require(path.join(cwd, 'models', 'Game'))
+const Secret = require(path.join(cwd, 'models', 'Secret'))
 
 /**
  * Scope
@@ -83,10 +84,10 @@ class KillHandler extends BaseHandler {
           })
         }
 
-      ]).then(() => {
+      }).then(() => {
         target = Player.get(handler.event.game, secret.val)
         return target.loaded
-      ]).then(() => {
+      }).then(() => {
         if (!target || !target.val) {
           return handler.error({
             scope,
