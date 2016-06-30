@@ -30,9 +30,14 @@ class RegisterHandler extends BaseHandler {
       .then(handler.registerPlayer)
       .then(handler.mapGamePlayer)
       .then(handler.done)
-      .catch(handler.internalServerError({
-        scope
-      }))
+      .catch(function (err) {
+        if (err) { 
+          throw err
+        }
+        handler.internalServerError({
+          scope
+        })
+      })
   }
     
   validate (opts) {
@@ -49,29 +54,29 @@ class RegisterHandler extends BaseHandler {
       let game = Game.get(handler.event.game)
       let user = User.get(handler.event.subject)
 
-      return Promise.all([
+      Promise.all([
         game.loaded,
         user.loaded
       ]).then(() => {
         if (!game || !game.val) {
-          return handler.error({
+          reject(handler.error({
             scope,
             message: `${handler.event.game} is an invalid game`
-          })
+          }))
         }
 
         if (!user || !user.val) {
-          return handler.error({
+          reject(handler.error({
             scope,
             message: `${handler.event.subject} is an invalid user`
-          })
+          }))
         }
 
         if (game.val.status !== 'registration') {
-          return handler.error({
+          reject(handler.error({
             scope,
             message: `${game.name} is not open for registration`
-          })
+          }))
         }
 
         resolve({
@@ -89,12 +94,14 @@ class RegisterHandler extends BaseHandler {
     let secret
 
     return new Promise((resolve, reject) => {
-      return player.loaded
-        .then(() => {
-          return new Promise((resolve, reject) => {
-            secret = Secret.create(player.val.uid)
-            secret.loaded.then(resolve)
+      return new Promise((resolve, reject) => {
+          Secret.registerSecret(user.val.uid).then((s) => {
+            secret = s
+            return secret.loaded
+          }).then(() => {
+            resolve() // resolve registerSecret
           })
+
         }).then(() => {
           return player.create({
             game: game.val.name,
@@ -102,7 +109,7 @@ class RegisterHandler extends BaseHandler {
             display_name: user.val.username,
             picture: user.val.picture,
             game_state: 'human',
-            secret: secret.val
+            secret: secret.snapshot.key
           })
         }).then(() => {
           resolve({
@@ -111,12 +118,13 @@ class RegisterHandler extends BaseHandler {
             user,
             player: player,
             secret: secret
-          })
+          }) // Resolve registerPlayer
         }).catch((err) => {
-          return handler.error({
+          if (err) throw err
+          reject(handler.error({
             scope,
-            message: `Could not create player ${user.uid} in game ${game.name}`
-          })
+            message: `Could not create player ${user.val.uid} in game ${game.val.name}`
+          }))
         })
     })
   }
@@ -125,15 +133,17 @@ class RegisterHandler extends BaseHandler {
     let {handler, game, player} = opts
 
     return new Promise((resolve, reject) => {
-      return game.mapPlayer(player)
-        .then(() => {
-          resolve(opts)
-        }).catch((err) => {
-          return handler.error({
-            scope,
-            message: `Could not map player to game`
+      player.loaded.then(() => {
+        return game.mapPlayer(player)
+          .then(() => {
+            resolve(opts) // resolve mapGamePlayer
+          }).catch((err) => {
+            return handler.error({
+              scope,
+              message: `Could not map player to game`
+            })
           })
-        })
+      })
     })
   }
 
