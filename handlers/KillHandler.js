@@ -34,23 +34,32 @@ class KillHandler extends BaseHandler {
     let {handler} = opts
 
     if (!handler.event || !handler.event.game) {
-      return handler.error({
-        scope,
-        message: 'kill event must have game field'
+      reject({
+        handler, 
+        err: handler.error({
+          scope,
+          message: 'kill event must have game field'
+        })
       })
     }
 
     if (!handler.event || !handler.event.subject) {
-      return handler.error({
-        scope,
-        message: 'kill event must have subject field'
+      reject({
+        handler, 
+        err: handler.error({
+          scope,
+          message: 'kill event must have subject field'
+        })
       })
     }
 
     if (!handler.event || !handler.event.secret) {
-      return handler.error({
-        scope,
-        message: 'kill event must have secret field'
+      reject({
+        handler, 
+        err: handler.error({
+          scope,
+          message: 'kill event must have secret field'
+        })
       })
     }
 
@@ -66,31 +75,43 @@ class KillHandler extends BaseHandler {
         secret.loaded
       ]).then(() => {
         if (!killer || !killer.val) {
-          reject(handler.error({
-            scope,
-            message: `${handler.event.subject} (killer) is an invalid player`
-          }))
+          reject({
+            handler, 
+            err: handler.error({
+              scope,
+              message: `${handler.event.subject} (killer) is an invalid player`
+            })
+          })
         }
 
         if (killer.val.game_state !== 'zombie' && killer.val.game_state !== 'original-zombie') {
-          reject(handler.error({
-            scope,
-            message: `${handler.event.subject} (killer) needs to be a zombie to tag a human`
-          }))
+          reject({
+            handler, 
+            err: handler.error({
+              scope,
+              message: `${handler.event.subject} (killer) needs to be a zombie to tag a human`
+            })
+          })
         }
 
         if (!game || game.val.status !== 'started') {
-          reject(handler.error({
-            scope,
-            message: `${handler.event.game} needs to have started to register a kill`
-          }))
+          reject({
+            handler, 
+            err: handler.error({
+              scope,
+              message: `${handler.event.game} needs to have started to register a kill`
+            })
+          })
         }
 
         if (!secret || !secret.val) {
-          reject(handler.error({
-            scope,
-            message: `${handler.event.secret} is an invalid secret`
-          }))
+          reject({
+            handler, 
+            err: handler.error({
+              scope,
+              message: `${handler.event.secret} is an invalid secret`
+            })
+          })
         }
 
       }).then(() => {
@@ -98,17 +119,23 @@ class KillHandler extends BaseHandler {
         return target.loaded
       }).then(() => {
         if (!target || !target.val) {
-          reject(handler.error({
-            scope,
-            message: `${secret.val} (target) is an invalid player`
-          }))
+          reject({
+            handler, 
+            err: handler.error({
+              scope,
+              message: `${secret.val} (target) is an invalid player`
+            })
+          })
         }
 
         if (target.val.game_state !== 'human') {
-          reject(handler.error({
-            scope,
-            message: `${secret.val} (target) needs to be human to be tagged`
-          }))
+          reject({
+            handler, 
+            err: handler.error({
+              scope,
+              message: `${secret.val} (target) needs to be human to be tagged`
+            })
+          })
         }
 
         resolve({
@@ -132,10 +159,13 @@ class KillHandler extends BaseHandler {
       ]).then(() => {
         resolve(opts)
       }).catch((err) => {
-        reject(handler.error({
-          scope,
-          message: err.message || err
-        }))
+        resolve({
+          handler,
+          err: handler.error({
+            scope,
+            message: err.message || err
+          })
+        })
       })
     })
   }
