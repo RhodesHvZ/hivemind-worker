@@ -44,13 +44,15 @@ class Secret extends Model {
       ref.set(val).then(() => {
         resolve(Secret.get(secret))
       })
-    }
+    })
   }
 
-  static * newSecret () {
-    crypto.randomBytes(3, (err, buf) => { 
-      yield buf.toString('hex').toUpperCase())
+  static *newSecret () {
+    let secret
+    yield crypto.randomBytes(3, (err, buf) => { 
+      secret = buf.toString('hex').toUpperCase()
     })
+    return secret
   }
 
   get uid () {
