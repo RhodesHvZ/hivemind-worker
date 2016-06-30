@@ -40,7 +40,7 @@ class Game extends Model {
   mapPlayer (player) {
     return new Promise((resolve, reject) => {
       let update = {}
-      update[`players/${player.uid}`] = true
+      update[`players/${player.val.uid}`] = true
       this.ref.update(update, () => {
         resolve(this)
       })
