@@ -5,6 +5,7 @@
 const cwd = process.cwd()
 const path = require('path')
 const firebase = require('firebase')
+const crypto = require('crypto')
 const Model = require(path.join(cwd, 'models', 'Model'))
 
 /**
@@ -37,22 +38,26 @@ class Secret extends Model {
       .child(secret)
   }
 
-  static create (val) {
-    let secret = Secret.newSecret()
-    let ref = Secret.getRef(secret)
-    return new Promise((resolve, reject) => {
-      ref.set(val).then(() => {
-        resolve(Secret.get(secret))
+  static registerSecret (val) {
+    return Secret.newSecret().then((secret) => {
+      let ref = Secret.getRef(secret)
+
+      return new Promise((resolve, reject) => {
+        ref.set(val).then(() => {
+          resolve(Secret.get(secret))
+        })
       })
-    })
+    })    
   }
 
-  static *newSecret () {
-    let secret
-    yield crypto.randomBytes(3, (err, buf) => { 
-      secret = buf.toString('hex').toUpperCase()
+  static newSecret () {
+    return new Promise((resolve, reject) => {
+      crypto.randomBytes(3, (err, buf) => {
+        if (err) throw err
+        let secret = buf.toString('hex').toUpperCase()
+        resolve(secret)
+      })
     })
-    return secret
   }
 
   get uid () {
