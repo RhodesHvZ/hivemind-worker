@@ -56,7 +56,7 @@ class Player extends Model {
   revive () {
     if (this.game_state === 'zombie' 
       && this.val.killed 
-      && this.val.killed + minute*30 > new Date() // Within 30 mins of kill
+      && this.val.killed + minute*20 > new Date() // Within 20 mins of kill
     ) {
       let revive_count = this.val.revive_count + 1 || 1
       let secret
