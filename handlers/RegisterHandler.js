@@ -31,11 +31,9 @@ class RegisterHandler extends BaseHandler {
       .then(handler.mapGamePlayer)
       .then(handler.done)
       .catch(function (err) {
-        if (err) { 
-          throw err
-        }
         handler.internalServerError({
-          scope
+          scope,
+          err
         })
       })
   }

@@ -55,9 +55,10 @@ class BaseHandler {
     return this.done({err})
   }
 
-  internalServerError (err) {
-    let {scope} = err
-    throw new Error(`${scope} Internal Server Error`)
+  internalServerError (error) {
+    let {scope, err} = error
+    console.error(err.stack)
+    throw new Error(`${scope} Internal Server Error: ${err.message}`)
   }
 
 }
