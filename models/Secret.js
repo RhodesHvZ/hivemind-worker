@@ -38,13 +38,23 @@ class Secret extends Model {
       .child(secret)
   }
 
-  static registerSecret (val) {
+  static registerSecret (val, oldSecret) {
     return Secret.newSecret().then((secret) => {
       let ref = Secret.getRef(secret)
+      let oldRef
+      if (oldSecret) {
+        oldRef = Secret.getRef(oldSecret)
+      }
 
       return new Promise((resolve, reject) => {
-        ref.set(val).then(() => {
-          resolve(Secret.get(secret))
+        return olfRef.remove()
+        .then(() => {
+          return ref.set(val).then(() => {
+            resolve(Secret.get(secret))
+          })
+        })
+        .catch((err) => {
+          reject(err)
         })
       })
     })    

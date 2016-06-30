@@ -8,6 +8,7 @@ const firebase = require('firebase')
 const Model = require(path.join(cwd, 'models', 'Model'))
 const Game = require(path.join(cwd, 'models', 'Game'))
 const User = require(path.join(cwd, 'models', 'User'))
+const Secret = require(path.join(cwd, 'models', 'Secret'))
 
 /**
  * Scope
@@ -40,7 +41,6 @@ class Player extends Model {
     }
 
     let ref = Player.getRef(game, uid)
-    console.log('REF', ref.key)
     return new Player(ref)
   }
 
@@ -59,9 +59,17 @@ class Player extends Model {
       && this.val.killed + minute*30 > new Date() // Within 30 mins of kill
     ) {
       let revive_count = this.val.revive_count + 1 || 1
-      return this.update({
-        revive_count,
-        game_state: 'human'
+      let secret
+
+      return Secret.registerSecret(this.val.uid).then((newSecret) => {
+        secret = newSecret
+        return secret.loaded
+      }).then(() => {
+        return this.update({
+          revive_count,
+          secret: secret.snapshot.key,
+          game_state: 'human'
+        })
       })
     } else if (this.val.game_state === 'human') {
       return this.update({
@@ -74,19 +82,28 @@ class Player extends Model {
 
   killedBy (killer) {
     let now = new Date().valueOf()
+    let killed_by = `killed_by/${killer.val.uid}`
+    let secret
     let update = {
       game_state: 'zombie',
-      'killed_by/' + killer.val.uid: now
       killed: now
     }
-    
+    update[killed_by] = now
+
     if (this.val.revive_pending) {
       update.revive_pending = false
       update.game_state = 'human'
       update.revive_count = this.val.revive_count + 1 || 1
-    }
 
-    return this.update(update)
+      return Secret.registerSecret(this.val.uid).then((newSecret) => {
+        secret = newSecret
+        return secret.loaded
+      }).then(() => {
+        return update.secret = secret.snapshot.key
+      })
+    } else {
+      return this.update(update)
+    }
   }
 
   kill (target) {
