@@ -95,11 +95,13 @@ class Player extends Model {
       update.game_state = 'human'
       update.revive_count = this.val.revive_count + 1 || 1
 
-      return Secret.registerSecret(this.val.uid).then((newSecret) => {
+      return Secret.registerSecret(this.val.uid, this.val.secret)
+      .then((newSecret) => {
         secret = newSecret
         return secret.loaded
       }).then(() => {
-        return update.secret = secret.snapshot.key
+        update.secret = secret.snapshot.key
+        return this.update(update)
       })
     } else {
       return this.update(update)
