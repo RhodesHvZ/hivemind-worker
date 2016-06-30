@@ -17,4 +17,4 @@ firebase.initializeApp({
 /**
  * Main
  */
-let dispatcher = new EventDispatcher()
+let dispatcher = EventDispatcher.init()

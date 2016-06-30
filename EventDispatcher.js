@@ -5,7 +5,7 @@
 const firebase = require('firebase')
 const cwd = process.cwd()
 const path = require('path')
-const Logger = require('../Logger')
+const Logger = require('./Logger')
 const handlers = {
   kill: require(path.join(cwd, 'handlers', 'KillHandler')),
   revive: require(path.join(cwd, 'handlers', 'ReviveHandler')),
@@ -36,14 +36,15 @@ class EventDispatcher {
       .child(event)
   }
 
-  constructor () {
-    firebase.database().ref().child('events').on('child_added')
-    .then(function (snapshot) {
+  static init () {
+    let dispatcher = new EventDispatcher()
+    firebase.database().ref().child('events').on('child_added', function (snapshot) {
       let event = snapshot.val()
       if (!event.processed) {
-        this.dispatch(event)
+        dispatcher.dispatch(event)
       }
     })
+    return dispatcher
   }
 
   dispatch (event) {
