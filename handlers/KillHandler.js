@@ -131,6 +131,11 @@ class KillHandler extends BaseHandler {
         subject.kill(target)
       ]).then(() => {
         resolve(opts)
+      }).catch((err) => {
+        reject(handler.error({
+          scope,
+          message: err.message || err
+        }))
       })
     })
   }
