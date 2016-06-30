@@ -38,12 +38,14 @@ class EventDispatcher {
 
   static init () {
     let dispatcher = new EventDispatcher()
-    firebase.database().ref().child('events').on('child_added', function (snapshot) {
-      let event = snapshot.val()
-      if (!event.processed) {
-        dispatcher.dispatch(event)
-      }
-    })
+    firebase.database().ref().child('events').orderByChild('processed').endAt(null)
+      .on('child_added', function (snapshot) {
+        let event = snapshot.val()
+        console.log(event.id)
+        if (!event.processed) {
+          dispatcher.dispatch(event)
+        }
+      })
     return dispatcher
   }
 
