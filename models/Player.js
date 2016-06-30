@@ -15,6 +15,11 @@ const User = require(path.join(cwd, 'models', 'User'))
 const scope = 'Player'
 
 /**
+ * 1 minute (DateTime)
+ */
+const minute = 1000*60
+
+/**
  * Player
  */
 class Player extends Model {
@@ -48,11 +53,40 @@ class Player extends Model {
       .child(uid)
   }
 
+  revive () {
+    if (this.game_state === 'zombie' 
+      && this.val.killed 
+      && this.val.killed + minute*30 > new Date() // Within 30 mins of kill
+    ) {
+      let revive_count = this.val.revive_count + 1 || 1
+      return this.update({
+        revive_count,
+        game_state: 'human'
+      })
+    } else if (this.val.game_state === 'human') {
+      return this.update({
+        revive_pending: true
+      })
+    }  else {
+      throw new Error(`Too late to revive ${this.val.uid}`)
+    }
+  }
+
   killedBy (killer) {
-    return this.update({
+    let now = new Date().valueOf()
+    let update = {
       game_state: 'zombie',
-      killed_by: killer.val.uid
-    })
+      'killed_by/' + killer.val.uid: now
+      killed: now
+    }
+    
+    if (this.val.revive_pending) {
+      update.revive_pending = false
+      update.game_state = 'human'
+      update.revive_count = this.val.revive_count + 1 || 1
+    }
+
+    return this.update(update)
   }
 
   kill (target) {
