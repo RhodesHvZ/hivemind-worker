@@ -49,32 +49,10 @@ class EventDispatcher {
 
   dispatch (event) {
     if (handlers[event.type]) {
-      new handlers[event.type].handle(event).then(function () {
-        Logger(event)
-        this.postHandle(event)
-      }).catch(function (err) {
-        this.postHandle(event, err)
-      })
+      handlers[event.type].handle(event)
     } else {
       this.unrecognised({event})
     }
-  }
-
-  postHandle (event, err) {
-    // Mark event as processed
-    let update = {
-      processed: new Date().valueOf()
-    }
-
-    // If err then mark event as void
-    if (err) {
-      console.error(err.stack || err)
-      update.void = true,
-      update.error = err.message || err
-    }
-
-    // Do update
-    EventDispatcher.getRef(event.id).update(update)
   }
 
   error (err) {
