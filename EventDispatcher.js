@@ -41,7 +41,6 @@ class EventDispatcher {
     firebase.database().ref().child('events').orderByChild('processed').endAt(null)
       .on('child_added', function (snapshot) {
         let event = snapshot.val()
-        console.log(event.id)
         if (!event.processed) {
           dispatcher.dispatch(event)
         }
