@@ -51,8 +51,8 @@ class BaseHandler {
   error (err) {
     let {scope, generic, message} = err
     let generic_string = generic ? '[GENERIC]' : ''
-    console.error(`${scope}${generic_string} ${message}`)
-    return this.done({err})
+    console.error(`[${scope}]${generic_string}[${this.event.id}] ${message}`)
+    return this.done({handler: this, err})
   }
 
   internalServerError (error) {
