@@ -61,7 +61,8 @@ class Player extends Model {
       let revive_count = this.val.revive_count + 1 || 1
       let secret
 
-      return Secret.registerSecret(this.val.uid).then((newSecret) => {
+      return Secret.registerSecret(this.val.uid, this.val.secret)
+      .then((newSecret) => {
         secret = newSecret
         return secret.loaded
       }).then(() => {
