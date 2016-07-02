@@ -54,13 +54,10 @@ class Player extends Model {
   }
 
   revive () {
-    if (this.game_state === 'zombie' 
-      && this.val.killed 
-      && this.val.killed + minute*20 > new Date() // Within 20 mins of kill
-    ) {
-      let revive_count = this.val.revive_count + 1 || 1
-      let secret
+    let revive_count = this.val.revive_count + 1 || 1
+    let secret
 
+    return new Promise((resolve, reject) => {
       return Secret.registerSecret(this.val.uid, this.val.secret)
       .then((newSecret) => {
         secret = newSecret
@@ -71,7 +68,18 @@ class Player extends Model {
           secret: secret.snapshot.key,
           game_state: 'human'
         })
+      }).then(() => {
+        resolve(secret.snapshot.key)
       })
+    })
+  }
+
+  consumeRevive () {
+    if (this.game_state === 'zombie' 
+      && this.val.killed 
+      && this.val.killed + minute*20 > new Date() // Within 20 mins of kill
+    ) {
+      return this.revive()
     } else if (this.val.game_state === 'human') {
       return this.update({
         revive_pending: true
@@ -84,7 +92,6 @@ class Player extends Model {
   killedBy (killer) {
     let now = new Date().valueOf()
     let killed_by = `killed_by/${killer.val.uid}`
-    let secret
     let update = {
       game_state: 'zombie',
       killed: now
@@ -92,16 +99,9 @@ class Player extends Model {
     update[killed_by] = now
 
     if (this.val.revive_pending) {
-      update.revive_pending = false
-      update.game_state = 'human'
-      update.revive_count = this.val.revive_count + 1 || 1
-
-      return Secret.registerSecret(this.val.uid, this.val.secret)
-      .then((newSecret) => {
-        secret = newSecret
-        return secret.loaded
-      }).then(() => {
-        update.secret = secret.snapshot.key
+      return this.revive()
+      .then((secret) => {
+        update.secret = secret
         return this.update(update)
       })
     } else {
